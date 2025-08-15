@@ -11,7 +11,10 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.exceptions.db.bulk.CcpErrorDbBulkItemNotFound;
-
+enum ElasticSearchBulkOperationResultConstants{
+	entity, id, json, filteredRecords, status, error, bulkItem, errorDetails
+	
+}
 class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	
 	private final CcpJsonRepresentation errorDetails;
@@ -27,23 +30,23 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
 		String fieldNameToId = dependency.getFieldNameToId();
-		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getInnerJson(operationName)).collect(Collectors.toList());
+		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getDynamicVersion().getInnerJson(operationName)).collect(Collectors.toList());
 		
-		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getAsString(fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
+		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getDynamicVersion().getAsString(fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
 		
 		if(filteredById.isEmpty()) {
 			CcpOtherConstants.EMPTY_JSON
-			.put("entity", bulkItem.entity)
-			.put("id", bulkItem.id)
-			.put("json", bulkItem.json)
-			.put("filteredRecords", bulkItem.id)
+			.put(ElasticSearchBulkOperationResultConstants.entity, bulkItem.entity)
+			.put(ElasticSearchBulkOperationResultConstants.id, bulkItem.id)
+			.put(ElasticSearchBulkOperationResultConstants.json, bulkItem.json)
+			.put(ElasticSearchBulkOperationResultConstants.filteredRecords, bulkItem.id)
 
 			;
 			
 			throw new CcpErrorDbBulkItemNotFound(bulkItem);
 		}
 		Optional<CcpJsonRepresentation> findFirst = filteredById.stream()
-		.filter(x -> x.getAsString(fieldNameToEntity).equals(entityName))
+		.filter(x -> x.getDynamicVersion().getAsString(fieldNameToEntity).equals(entityName))
 		.findFirst();
 		
 		boolean idNotFoundInTheEntity = findFirst.isPresent() == false;
@@ -54,8 +57,8 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		
 		CcpJsonRepresentation details = findFirst.get();
 
-		this.status = details.getAsIntegerNumber("status"); 
-		this.errorDetails = details.getInnerJson("error");
+		this.status = details.getAsIntegerNumber(ElasticSearchBulkOperationResultConstants.status); 
+		this.errorDetails = details.getInnerJson(ElasticSearchBulkOperationResultConstants.error);
 		this.bulkItem = bulkItem;
 	}
 	
@@ -86,9 +89,9 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	public CcpJsonRepresentation asMap() {
 		CcpJsonRepresentation asMap = this.bulkItem.asMap();
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put("bulkItem", asMap)
-				.put("status", this.status)
-				.put("errorDetails", this.errorDetails)
+				.put(ElasticSearchBulkOperationResultConstants.bulkItem, asMap)
+				.put(ElasticSearchBulkOperationResultConstants.status, this.status)
+				.put(ElasticSearchBulkOperationResultConstants.errorDetails, this.errorDetails)
 				;
 		return put;
 	}
