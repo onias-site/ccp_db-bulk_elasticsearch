@@ -3,13 +3,14 @@ package com.ccp.implementations.db.bulk.elasticsearch;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 
-enum BulkOperationConstants{
+enum BulkOperationConstants  implements CcpJsonFieldName{
 	doc, _id, _index
 }
 
-enum BulkOperation {
+enum BulkOperation  implements CcpJsonFieldName{
 	delete {
 		
 		String getSecondLine(CcpJsonRepresentation json) {
