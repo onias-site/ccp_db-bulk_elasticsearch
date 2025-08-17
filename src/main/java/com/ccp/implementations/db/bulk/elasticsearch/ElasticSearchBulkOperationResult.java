@@ -10,13 +10,12 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
+import com.ccp.especifications.db.bulk.CcpErrorDbBulkItemNotFound;
 import com.ccp.especifications.db.utils.CcpDbRequester;
-import com.ccp.exceptions.db.bulk.CcpErrorDbBulkItemNotFound;
-enum ElasticSearchBulkOperationResultConstants  implements CcpJsonFieldName{
-	entity, id, json, filteredRecords, status, error, bulkItem, errorDetails
-	
-}
 class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
+	enum JsonFieldNames implements CcpJsonFieldName{
+		entity, id, json, filteredRecords, status, error, bulkItem, errorDetails
+	}
 	
 	private final CcpJsonRepresentation errorDetails;
 
@@ -37,10 +36,10 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		
 		if(filteredById.isEmpty()) {
 			CcpOtherConstants.EMPTY_JSON
-			.put(ElasticSearchBulkOperationResultConstants.entity, bulkItem.entity)
-			.put(ElasticSearchBulkOperationResultConstants.id, bulkItem.id)
-			.put(ElasticSearchBulkOperationResultConstants.json, bulkItem.json)
-			.put(ElasticSearchBulkOperationResultConstants.filteredRecords, bulkItem.id)
+			.put(JsonFieldNames.entity, bulkItem.entity)
+			.put(JsonFieldNames.id, bulkItem.id)
+			.put(JsonFieldNames.json, bulkItem.json)
+			.put(JsonFieldNames.filteredRecords, bulkItem.id)
 
 			;
 			
@@ -58,8 +57,8 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		
 		CcpJsonRepresentation details = findFirst.get();
 
-		this.status = details.getAsIntegerNumber(ElasticSearchBulkOperationResultConstants.status); 
-		this.errorDetails = details.getInnerJson(ElasticSearchBulkOperationResultConstants.error);
+		this.status = details.getAsIntegerNumber(JsonFieldNames.status); 
+		this.errorDetails = details.getInnerJson(JsonFieldNames.error);
 		this.bulkItem = bulkItem;
 	}
 	
@@ -90,9 +89,9 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	public CcpJsonRepresentation asMap() {
 		CcpJsonRepresentation asMap = this.bulkItem.asMap();
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put(ElasticSearchBulkOperationResultConstants.bulkItem, asMap)
-				.put(ElasticSearchBulkOperationResultConstants.status, this.status)
-				.put(ElasticSearchBulkOperationResultConstants.errorDetails, this.errorDetails)
+				.put(JsonFieldNames.bulkItem, asMap)
+				.put(JsonFieldNames.status, this.status)
+				.put(JsonFieldNames.errorDetails, this.errorDetails)
 				;
 		return put;
 	}

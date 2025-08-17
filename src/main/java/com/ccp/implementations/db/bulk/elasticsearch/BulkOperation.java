@@ -6,11 +6,8 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 
-enum BulkOperationConstants  implements CcpJsonFieldName{
-	doc, _id, _index
-}
 
-enum BulkOperation  implements CcpJsonFieldName{
+enum BulkOperation implements CcpJsonFieldName{
 	delete {
 		
 		String getSecondLine(CcpJsonRepresentation json) {
@@ -19,7 +16,7 @@ enum BulkOperation  implements CcpJsonFieldName{
 	}, update {
 		
 		String getSecondLine(CcpJsonRepresentation json) {
-			return CcpOtherConstants.EMPTY_JSON.put(BulkOperationConstants.doc, json).asUgglyJson();
+			return CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.doc, json).asUgglyJson();
 		}
 	}, create {
 		
@@ -44,12 +41,15 @@ enum BulkOperation  implements CcpJsonFieldName{
 	private String getFirstLine(CcpBulkItem item) {
 		String entityName = item.entity.getEntityName();
 		String firstLine = CcpOtherConstants.EMPTY_JSON
-				.addToItem(this, BulkOperationConstants._index, entityName)
-				.addToItem(this, BulkOperationConstants._id, item.id)
+				.addToItem(this, JsonFieldNames._index, entityName)
+				.addToItem(this, JsonFieldNames._id, item.id)
 				.asUgglyJson();
 		return firstLine;
 	}
 	
 	abstract String getSecondLine(CcpJsonRepresentation json);
 	
+	enum JsonFieldNames implements CcpJsonFieldName{
+		doc, _id, _index
+	}
 }
