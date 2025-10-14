@@ -33,13 +33,13 @@ class BulkItem {
 		try {
 			BulkItem other = (BulkItem)obj;
 			
-			boolean differentEntity = other.entity.equals(this.entity) == false;
+			boolean differentEntity = false == other.entity.equals(this.entity);
 			
 			if(differentEntity) {
 				return false;
 			}
 			
-			boolean differentId = other.id.equals(this.id) == false;
+			boolean differentId = false == other.id.equals(this.id);
 			
 			if(differentId) {
 				return false;

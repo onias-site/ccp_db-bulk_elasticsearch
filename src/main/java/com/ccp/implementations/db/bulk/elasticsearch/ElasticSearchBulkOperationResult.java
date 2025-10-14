@@ -49,7 +49,7 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		.filter(x -> x.getDynamicVersion().getAsString(fieldNameToEntity).equals(entityName))
 		.findFirst();
 		
-		boolean idNotFoundInTheEntity = findFirst.isPresent() == false;
+		boolean idNotFoundInTheEntity = false == findFirst.isPresent();
 		
 		if(idNotFoundInTheEntity) {
 			throw new CcpErrorDbBulkItemNotFound(bulkItem, result);
@@ -72,7 +72,7 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 
 	public boolean hasError() {
 		boolean empty = this.errorDetails.isEmpty();
-		return empty == false;
+		return false == empty;
 	}
 
 	public int status() {
