@@ -10,7 +10,7 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
-import com.ccp.especifications.db.bulk.CcpDbBulkExecutor;
+import com.ccp.especifications.db.bulk.CcpBulkExecutor;
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.http.CcpHttpMethods;
 import com.ccp.especifications.http.CcpHttpResponseType;
@@ -35,7 +35,7 @@ enum ElasticSerchDbBulkExecutorSpecialWords implements CcpJsonFieldName{
 
 }
 
-class ElasticSerchDbBulkExecutor implements CcpDbBulkExecutor{
+class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 	
 	private final List<CcpBulkItem> bulkItems;
 	
@@ -43,7 +43,7 @@ class ElasticSerchDbBulkExecutor implements CcpDbBulkExecutor{
 		this.bulkItems = bulkItems;
 	}
 
-	public CcpDbBulkExecutor addRecord(CcpBulkItem bulkItem) {
+	public CcpBulkExecutor addRecord(CcpBulkItem bulkItem) {
 		this.bulkItems.add(bulkItem);
 		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(this.bulkItems);
 		return response;
@@ -69,7 +69,7 @@ class ElasticSerchDbBulkExecutor implements CcpDbBulkExecutor{
 		return collect;
 	}
 
-	public CcpDbBulkExecutor clearRecords() {
+	public CcpBulkExecutor clearRecords() {
 		this.bulkItems.clear();
 		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(this.bulkItems);
 		return response;
