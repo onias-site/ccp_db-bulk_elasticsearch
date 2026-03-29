@@ -63,11 +63,11 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	}
 	
 	public CcpJsonRepresentation getErrorDetails() {
-		return errorDetails;
+		return this.errorDetails;
 	}
 
 	public CcpBulkItem getBulkItem() {
-		return bulkItem;
+		return this.bulkItem;
 	}
 
 	public boolean hasError() {
@@ -81,18 +81,13 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 
 	
 	public String toString() {
-		CcpJsonRepresentation asMap = this.asMap();
-		String string = asMap.toString();
-		return string;
-	}
-
-	public CcpJsonRepresentation asMap() {
 		CcpJsonRepresentation asMap = this.bulkItem.asMap();
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
 				.put(JsonFieldNames.bulkItem, asMap)
 				.put(JsonFieldNames.status, this.status)
 				.put(JsonFieldNames.errorDetails, this.errorDetails)
 				;
-		return put;
+		String string = put.toString();
+		return string;
 	}
 }
