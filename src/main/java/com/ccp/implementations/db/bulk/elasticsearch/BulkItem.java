@@ -1,6 +1,7 @@
 package com.ccp.implementations.db.bulk.elasticsearch;
 
 import com.ccp.especifications.db.bulk.CcpBulkItem;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 
 class BulkItem {
 	final String id;
@@ -12,7 +13,8 @@ class BulkItem {
 		String name = item.operation.name();
 		BulkOperation valueOf = BulkOperation.valueOf(name);
 		String content = valueOf.getContent(item);
-		this.entity = item.entity.getEntityName();
+		CcpEntityDetails entityDetails = item.entity.getEntityDetails();
+		this.entity = entityDetails.entityName;
 		this.content = content;
 		this.id = item.id;
 	}

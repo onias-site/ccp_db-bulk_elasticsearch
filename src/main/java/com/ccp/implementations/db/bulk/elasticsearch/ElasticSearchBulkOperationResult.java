@@ -12,6 +12,7 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.bulk.CcpErrorBulkItemNotFound;
 import com.ccp.especifications.db.utils.CcpDbRequester;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		entity, id, json, filteredRecords, status, error, bulkItem, errorDetails
@@ -25,7 +26,8 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	
 	public ElasticSearchBulkOperationResult(CcpBulkItem bulkItem, List<CcpJsonRepresentation> result) {
 
-		String entityName = bulkItem.entity.getEntityName();
+		CcpEntityDetails entityDetails = bulkItem.entity.getEntityDetails();
+		String entityName = entityDetails.entityName;
 		String operationName = bulkItem.operation.name();
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
