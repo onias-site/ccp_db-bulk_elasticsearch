@@ -44,8 +44,9 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 	}
 
 	public CcpBulkExecutor addRecord(CcpBulkItem bulkItem) {
-		this.bulkItems.add(bulkItem);
-		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(this.bulkItems);
+		ArrayList<CcpBulkItem> bulkItems = new ArrayList<>(this.bulkItems);
+		bulkItems.add(bulkItem);
+		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(bulkItems);
 		return response;
 	}
 
@@ -65,13 +66,14 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 		List<CcpJsonRepresentation> items = executeHttpRequest.getAsJsonList(JsonFieldNames.items);
 
 		List<CcpBulkOperationResult> collect = new ArrayList<>(this.bulkItems).stream().map(bulkItem -> new ElasticSearchBulkOperationResult(bulkItem, items)).collect(Collectors.toList());
-		this.bulkItems.clear();
+		synchronized (String.class) {
+			this.bulkItems.clear();
+		}
 		return collect;
 	}
 
 	public CcpBulkExecutor clearRecords() {
-		this.bulkItems.clear();
-		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(this.bulkItems);
+		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(new ArrayList<>());
 		return response;
 	}
 

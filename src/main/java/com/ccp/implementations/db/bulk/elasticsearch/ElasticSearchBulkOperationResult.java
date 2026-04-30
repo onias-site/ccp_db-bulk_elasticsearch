@@ -37,15 +37,8 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getDynamicVersion().getAsString(fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
 		
 		if(filteredById.isEmpty()) {
-			CcpOtherConstants.EMPTY_JSON
-			.put(JsonFieldNames.entity, bulkItem.entity)
-			.put(JsonFieldNames.id, bulkItem.id)
-			.put(JsonFieldNames.json, bulkItem.json)
-			.put(JsonFieldNames.filteredRecords, bulkItem.id)
-
-			;
 			
-			throw new CcpErrorBulkItemNotFound(bulkItem);
+			throw new CcpErrorBulkItemNotFound(bulkItem, result);
 		}
 		Optional<CcpJsonRepresentation> findFirst = filteredById.stream()
 		.filter(x -> x.getDynamicVersion().getAsString(fieldNameToEntity).equals(entityName))
