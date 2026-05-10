@@ -5,7 +5,7 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 
 
 enum BulkOperation implements CcpJsonFieldName{
@@ -40,7 +40,7 @@ enum BulkOperation implements CcpJsonFieldName{
 	}
 
 	private String getFirstLine(CcpBulkItem item) {
-		CcpEntityDetails entityDetails = item.entity.getEntityDetails();
+		CcpEntityMetaData entityDetails = item.entity.getEntityMetaData();
 		String entityName = entityDetails.entityName;
 		String firstLine = CcpOtherConstants.EMPTY_JSON
 				.addToItem(this, JsonFieldNames._index, entityName)
