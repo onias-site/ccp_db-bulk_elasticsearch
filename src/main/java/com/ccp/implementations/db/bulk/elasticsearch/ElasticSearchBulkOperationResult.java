@@ -32,16 +32,16 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
 		String fieldNameToId = dependency.getFieldNameToId();
-		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getDynamicVersion().getInnerJson(operationName)).collect(Collectors.toList());
-		
-		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getDynamicVersion().getAsString(fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
-		
+		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getInnerJson(() -> operationName)).collect(Collectors.toList());
+
+		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getAsString(() -> fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
+
 		if(filteredById.isEmpty()) {
-			
+
 			throw new CcpErrorBulkItemNotFound(bulkItem, result);
 		}
 		Optional<CcpJsonRepresentation> findFirst = filteredById.stream()
-		.filter(x -> x.getDynamicVersion().getAsString(fieldNameToEntity).equals(entityName))
+		.filter(x -> x.getAsString(() -> fieldNameToEntity).equals(entityName))
 		.findFirst();
 		
 		boolean idNotFoundInTheEntity = false == findFirst.isPresent();
