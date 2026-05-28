@@ -28,11 +28,10 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 
 		CcpEntityMetaData entityDetails = bulkItem.entity.getEntityMetaData();
 		String entityName = entityDetails.entityName;
-		String operationName = bulkItem.operation.name();
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
 		String fieldNameToId = dependency.getFieldNameToId();
-		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getInnerJson(() -> operationName)).collect(Collectors.toList());
+		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getInnerJson(bulkItem.operation)).collect(Collectors.toList());
 
 		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getAsString(() -> fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
 
