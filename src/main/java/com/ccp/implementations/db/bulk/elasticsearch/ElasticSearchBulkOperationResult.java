@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
@@ -33,14 +34,14 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		String fieldNameToId = dependency.getFieldNameToId();
 		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getInnerJson(bulkItem.operation)).collect(Collectors.toList());
 
-		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getAsString(() -> fieldNameToId).equals(bulkItem.id)).collect(Collectors.toList());
+		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getAsString(new CcpFieldName(fieldNameToId)).equals(bulkItem.id)).collect(Collectors.toList());
 
 		if(filteredById.isEmpty()) {
 
 			throw new CcpErrorBulkItemNotFound(bulkItem, result);
 		}
 		Optional<CcpJsonRepresentation> findFirst = filteredById.stream()
-		.filter(x -> x.getAsString(() -> fieldNameToEntity).equals(entityName))
+		.filter(x -> x.getAsString(new CcpFieldName(fieldNameToEntity)).equals(entityName))
 		.findFirst();
 		
 		boolean idNotFoundInTheEntity = false == findFirst.isPresent();
