@@ -35,6 +35,10 @@ enum ElasticSerchDbBulkExecutorSpecialWords implements CcpJsonFieldName{
 
 }
 
+/**
+ * Implementação de {@code CcpBulkExecutor} que acumula itens bulk e os envia em uma única
+ * requisição HTTP {@code POST /_bulk} ao Elasticsearch no formato NDJSON.
+ */
 class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 	
 	private final List<CcpBulkItem> bulkItems;

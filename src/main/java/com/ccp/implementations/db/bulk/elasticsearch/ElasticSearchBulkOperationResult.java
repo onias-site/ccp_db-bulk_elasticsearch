@@ -14,6 +14,11 @@ import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.bulk.CcpErrorBulkItemNotFound;
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
+/**
+ * Representa o resultado de uma operação individual dentro de uma resposta bulk do Elasticsearch.
+ * Localiza o item correspondente na lista de resultados pelo id e pelo nome da entidade,
+ * expondo status HTTP, detalhes de erro e o {@code CcpBulkItem} original.
+ */
 class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		entity, id, json, filteredRecords, status, error, bulkItem, errorDetails

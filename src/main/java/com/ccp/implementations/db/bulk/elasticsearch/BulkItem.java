@@ -3,6 +3,11 @@ package com.ccp.implementations.db.bulk.elasticsearch;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 
+/**
+ * Representa um item individual de operação em bulk para o Elasticsearch. Converte um CcpBulkItem
+ * (abstrato) em sua representação de texto no formato NDJSON (Newline Delimited JSON) exigido pela
+ * API _bulk do Elasticsearch.
+ */
 class BulkItem {
 	final String id;
 	final String entity;

@@ -8,6 +8,11 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 
 
+/**
+ * Enum que representa as operações bulk do Elasticsearch ({@code delete}, {@code update},
+ * {@code create}). Cada constante gera a segunda linha do par NDJSON correspondente à
+ * operação via {@code getContent(CcpBulkItem)}.
+ */
 enum BulkOperation implements CcpJsonFieldName{
 	delete {
 		
