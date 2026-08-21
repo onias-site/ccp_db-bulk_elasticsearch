@@ -55,7 +55,7 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 	}
 
 	public List<CcpBulkOperationResult> getBulkOperationResult() {
-		if(this.bulkItems.isEmpty()) {
+		if(this.bulkItems.isEmpty()) { 
 			return new ArrayList<>();
 		} 
 		
