@@ -27,26 +27,36 @@ class BulkItem {
 	
 	
 	public String toString() {
-		return "BulkItem [id=" + id + ", entity=" + entity + ", content=" + content + "]";
+		String valorMais = "BulkItem [id=" + id;
+		String valorMaisMais = valorMais + ", entity=";
+		String valorMaisMaisMais = valorMaisMais + entity;
+		String valorMaisMaisMaisMais = valorMaisMaisMais + ", content=";
+		String valorMaisMaisMaisMaisMais = valorMaisMaisMaisMais + content;
+		String valorMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMais + "]";
+		return valorMaisMaisMaisMaisMaisMais;
 	}
 
 
 	public int hashCode() {
-		return (this.entity + this.id).hashCode();
+		String entityMais = this.entity + this.id;
+		int hashCode = (entityMais).hashCode();
+		return hashCode;
 	}
 	
 	
 	public boolean equals(Object obj) {
 		try {
 			BulkItem other = (BulkItem)obj;
-			
-			boolean differentEntity = false == other.entity.equals(this.entity);
+			boolean entityEquals = other.entity.equals(this.entity);
+
+			boolean differentEntity = false == entityEquals;
 			
 			if(differentEntity) {
 				return false;
 			}
-			
-			boolean differentId = false == other.id.equals(this.id);
+			boolean idEquals = other.id.equals(this.id);
+
+			boolean differentId = false == idEquals;
 			
 			if(differentId) {
 				return false;

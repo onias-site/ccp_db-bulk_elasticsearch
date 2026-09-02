@@ -15,7 +15,8 @@ public class CcpElasticSerchDbBulk implements CcpInstanceProvider<CcpBulkExecuto
 
 	public CcpBulkExecutor getInstance() {
 		ArrayList<CcpBulkItem> bulkItems = new ArrayList<>();
-		return new ElasticSerchDbBulkExecutor(bulkItems);
+		ElasticSerchDbBulkExecutor elasticSerchDbBulkExecutor = new ElasticSerchDbBulkExecutor(bulkItems);
+		return elasticSerchDbBulkExecutor;
 	}
 
 }

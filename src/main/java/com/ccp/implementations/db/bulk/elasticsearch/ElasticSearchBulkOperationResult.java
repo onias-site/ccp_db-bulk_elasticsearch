@@ -7,18 +7,19 @@ import java.util.stream.Collectors;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
-/**
+import java.util.stream.Stream;/**
  * Representa o resultado de uma operação individual dentro de uma resposta bulk do Elasticsearch.
  * Localiza o item correspondente na lista de resultados pelo id e pelo nome da entidade,
  * expondo status HTTP, detalhes de erro e o {@code CcpBulkItem} original.
  */
+
 class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		entity, id, json, filteredRecords, status, error, bulkItem, errorDetails
@@ -37,22 +38,32 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
 		String fieldNameToId = dependency.getFieldNameToId();
-		List<CcpJsonRepresentation> map = result.stream().map(x -> x.getInnerJson(bulkItem.operation)).collect(Collectors.toList());
+		Stream<CcpJsonRepresentation> stream = result.stream();
+		var streamMap = stream.map(x -> x.getInnerJson(bulkItem.operation));
+		List<CcpJsonRepresentation> map = streamMap.collect(Collectors.toList());
+		Stream<CcpJsonRepresentation> stream2 = map.stream();
+		var filter = stream2.filter(x -> x.getAsString(new CcpFieldName(fieldNameToId)).equals(bulkItem.id));
 
-		List<CcpJsonRepresentation> filteredById = map.stream().filter(x -> x.getAsString(new CcpFieldName(fieldNameToId)).equals(bulkItem.id)).collect(Collectors.toList());
+		List<CcpJsonRepresentation> filteredById = filter.collect(Collectors.toList());
+		boolean filteredByIdEmpty = filteredById.isEmpty();
 
-		if(filteredById.isEmpty()) {
+		if(filteredByIdEmpty) {
+			CcpErrorBulkItemNotFound ccpErrorBulkItemNotFound = new CcpErrorBulkItemNotFound(bulkItem, result);
 
-			throw new CcpErrorBulkItemNotFound(bulkItem, result);
+			throw ccpErrorBulkItemNotFound;
 		}
-		Optional<CcpJsonRepresentation> findFirst = filteredById.stream()
-		.filter(x -> x.getAsString(new CcpFieldName(fieldNameToEntity)).equals(entityName))
+		Stream<CcpJsonRepresentation> stream3 = filteredById.stream();
+		var filter2 = stream3
+		.filter(x -> x.getAsString(new CcpFieldName(fieldNameToEntity)).equals(entityName));
+		Optional<CcpJsonRepresentation> findFirst = filter2
 		.findFirst();
-		
-		boolean idNotFoundInTheEntity = false == findFirst.isPresent();
+		boolean findFirstPresent = findFirst.isPresent();
+
+		boolean idNotFoundInTheEntity = false == findFirstPresent;
 		
 		if(idNotFoundInTheEntity) {
-			throw new CcpErrorBulkItemNotFound(bulkItem, result);
+			CcpErrorBulkItemNotFound ccpErrorBulkItemNotFound2 = new CcpErrorBulkItemNotFound(bulkItem, result);
+			throw ccpErrorBulkItemNotFound2;
 		}
 		
 		CcpJsonRepresentation details = findFirst.get();
@@ -72,7 +83,8 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 
 	public boolean hasError() {
 		boolean empty = this.errorDetails.isEmpty();
-		return false == empty;
+		boolean valorIgual = false == empty;
+		return valorIgual;
 	}
 
 	public int status() {
@@ -82,9 +94,11 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	
 	public String toString() {
 		CcpJsonRepresentation asMap = this.bulkItem.asMap();
-		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put(JsonFieldNames.bulkItem, asMap)
-				.put(JsonFieldNames.status, this.status)
+		CcpJsonRepresentation put2 = CcpOtherConstants.EMPTY_JSON
+				.put(JsonFieldNames.bulkItem, asMap);
+				CcpJsonRepresentation put3 = put2
+				.put(JsonFieldNames.status, this.status);
+				CcpJsonRepresentation put = put3
 				.put(JsonFieldNames.errorDetails, this.errorDetails)
 				;
 		String string = put.toString();

@@ -3,7 +3,7 @@ package com.ccp.implementations.db.bulk.elasticsearch;
 
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 
@@ -22,12 +22,15 @@ enum BulkOperation implements CcpJsonFieldName{
 	}, update {
 		
 		String getSecondLine(CcpJsonRepresentation json) {
-			return CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.doc, json).asUgglyJson();
+			CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.doc, json);
+			String asUgglyJson = put.asUgglyJson();
+			return asUgglyJson;
 		}
 	}, create {
 		
 		String getSecondLine(CcpJsonRepresentation json) {
-			return json.asUgglyJson();
+			String asUgglyJson2 = json.asUgglyJson();
+			return asUgglyJson2;
 		}
 	}
 	;
@@ -38,8 +41,10 @@ enum BulkOperation implements CcpJsonFieldName{
 		String firstLine = this.getFirstLine(item);
 		
 		String secondLine = this.getSecondLine(item.json);
-		
-		String content = firstLine + NEW_LINE + secondLine + NEW_LINE;
+		String firstLineMais = firstLine + NEW_LINE;
+		String firstLineMaisMais = firstLineMais + secondLine;
+
+		String content = firstLineMaisMais + NEW_LINE;
 	
 		return content;
 	}
@@ -47,9 +52,11 @@ enum BulkOperation implements CcpJsonFieldName{
 	private String getFirstLine(CcpBulkItem item) {
 		CcpEntityMetaData entityDetails = item.entity.getEntityMetaData();
 		String entityName = entityDetails.entityName;
-		String firstLine = CcpOtherConstants.EMPTY_JSON
-				.addToItem(this, JsonFieldNames._index, entityName)
-				.addToItem(this, JsonFieldNames._id, item.id)
+		CcpJsonRepresentation addToItem = CcpOtherConstants.EMPTY_JSON
+				.addToItem(this, JsonFieldNames._index, entityName);
+				CcpJsonRepresentation addToItem2 = addToItem
+				.addToItem(this, JsonFieldNames._id, item.id);
+				String firstLine = addToItem2
 				.asUgglyJson();
 		return firstLine;
 	}
