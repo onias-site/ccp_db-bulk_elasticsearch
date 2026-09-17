@@ -8,6 +8,8 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 
 
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
+
 /**
  * Enum que representa as operações bulk do Elasticsearch ({@code delete}, {@code update},
  * {@code create}). Cada constante gera a segunda linha do par NDJSON correspondente à
@@ -34,7 +36,7 @@ enum BulkOperation implements CcpJsonFieldName{
 		}
 	}
 	;
-	static final String NEW_LINE = System.getProperty("line.separator");
+	static final String NEW_LINE = System.getProperty(BulkOperationSpecialWords.line_separator.getValue());
 
 	public String getContent(CcpBulkItem item) {
 
@@ -53,9 +55,9 @@ enum BulkOperation implements CcpJsonFieldName{
 		CcpEntityMetaData entityDetails = item.entity.getEntityMetaData();
 		String entityName = entityDetails.entityName;
 		CcpJsonRepresentation addToItem = CcpOtherConstants.EMPTY_JSON
-				.addToItem(this, JsonFieldNames._index, entityName);
+				.addToItem(this, CcpJsonCommonsFields._index, entityName);
 				CcpJsonRepresentation addToItem2 = addToItem
-				.addToItem(this, JsonFieldNames._id, item.id);
+				.addToItem(this, CcpJsonCommonsFields._id, item.id);
 				String firstLine = addToItem2
 				.asUgglyJson();
 		return firstLine;
@@ -64,6 +66,6 @@ enum BulkOperation implements CcpJsonFieldName{
 	abstract String getSecondLine(CcpJsonRepresentation json);
 	
 	enum JsonFieldNames implements CcpJsonFieldName{
-		doc, _id, _index
+		doc
 	}
 }

@@ -14,6 +14,7 @@ import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 import java.util.stream.Stream;/**
  * Representa o resultado de uma operação individual dentro de uma resposta bulk do Elasticsearch.
  * Localiza o item correspondente na lista de resultados pelo id e pelo nome da entidade,
@@ -22,7 +23,7 @@ import java.util.stream.Stream;/**
 
 class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	enum JsonFieldNames implements CcpJsonFieldName{
-		entity, id, json, filteredRecords, status, error, bulkItem, errorDetails
+		entity, id, json, filteredRecords, status, bulkItem
 	}
 	
 	private final CcpJsonRepresentation errorDetails;
@@ -69,7 +70,7 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		CcpJsonRepresentation details = findFirst.get();
 
 		this.status = details.getAsIntegerNumber(JsonFieldNames.status); 
-		this.errorDetails = details.getInnerJson(JsonFieldNames.error);
+		this.errorDetails = details.getInnerJson(CcpJsonCommonsFields.error);
 		this.bulkItem = bulkItem;
 	}
 	
@@ -99,7 +100,7 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 				CcpJsonRepresentation put3 = put2
 				.put(JsonFieldNames.status, this.status);
 				CcpJsonRepresentation put = put3
-				.put(JsonFieldNames.errorDetails, this.errorDetails)
+				.put(CcpJsonCommonsFields.errorDetails, this.errorDetails)
 				;
 		String string = put.toString();
 		return string;
