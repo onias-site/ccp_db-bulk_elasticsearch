@@ -4,9 +4,9 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 
 /**
- * Representa um item individual de operação em bulk para o Elasticsearch. Converte um CcpBulkItem
- * (abstrato) em sua representação de texto no formato NDJSON (Newline Delimited JSON) exigido pela
- * API _bulk do Elasticsearch.
+ * Represents a single bulk operation item for Elasticsearch. Converts an (abstract) CcpBulkItem
+ * into its text representation in the NDJSON (Newline Delimited JSON) format required by the
+ * Elasticsearch _bulk API.
  */
 class BulkItem {
 	final String id;
@@ -16,8 +16,8 @@ class BulkItem {
 	public BulkItem(CcpBulkItem item) {
 
 		String name = item.operation.name();
-		BulkOperation valueOf = BulkOperation.valueOf(name);
-		String content = valueOf.getContent(item);
+		BulkOperation bulkOperation = BulkOperation.valueOf(name);
+		String content = bulkOperation.getContent(item);
 		CcpEntityMetaData entityDetails = item.entity.getEntityMetaData();
 		this.entity = entityDetails.entityName;
 		this.content = content;
@@ -27,19 +27,19 @@ class BulkItem {
 	
 	
 	public String toString() {
-		String valorMais = "BulkItem [id=" + id;
-		String valorMaisMais = valorMais + ", entity=";
-		String valorMaisMaisMais = valorMaisMais + entity;
-		String valorMaisMaisMaisMais = valorMaisMaisMais + ", content=";
-		String valorMaisMaisMaisMaisMais = valorMaisMaisMaisMais + content;
-		String valorMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMais + "]";
-		return valorMaisMaisMaisMaisMaisMais;
+		String textWithId = "BulkItem [id=" + id;
+		String textWithEntityLabel = textWithId + ", entity=";
+		String textWithEntity = textWithEntityLabel + entity;
+		String textWithContentLabel = textWithEntity + ", content=";
+		String textWithContent = textWithContentLabel + content;
+		String bulkItemAsText = textWithContent + "]";
+		return bulkItemAsText;
 	}
 
 
 	public int hashCode() {
-		String entityMais = this.entity + this.id;
-		int hashCode = (entityMais).hashCode();
+		String entityAndId = this.entity + this.id;
+		int hashCode = (entityAndId).hashCode();
 		return hashCode;
 	}
 	

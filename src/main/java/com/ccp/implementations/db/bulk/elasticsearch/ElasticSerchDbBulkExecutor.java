@@ -20,8 +20,8 @@ import java.util.stream.Stream;
 
 
 /**
- * Implementação de {@code CcpBulkExecutor} que acumula itens bulk e os envia em uma única
- * requisição HTTP {@code POST /_bulk} ao Elasticsearch no formato NDJSON.
+ * {@code CcpBulkExecutor} implementation that accumulates bulk items and sends them in a single
+ * HTTP {@code POST /_bulk} request to Elasticsearch in NDJSON format.
  */
 class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 	
@@ -45,25 +45,25 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 		} 
 		
 		StringBuilder body = new StringBuilder();
-		Stream<CcpBulkItem> stream = this.bulkItems.stream();
-		var streamMap = stream.map( x -> new BulkItem(x));
-		List<BulkItem> bulkItems = streamMap.collect(Collectors.toList());
+		Stream<CcpBulkItem> bulkItemsStream = this.bulkItems.stream();
+		var ndjsonItemsStream = bulkItemsStream.map( x -> new BulkItem(x));
+		List<BulkItem> bulkItems = ndjsonItemsStream.collect(Collectors.toList());
 		for (BulkItem bulkItem : bulkItems) {
 			body.append(bulkItem.content);
 		}
 		CcpJsonRepresentation headers = CcpOtherConstants.EMPTY_JSON.put(ElasticSerchDbBulkExecutorSpecialWords.Content_Type, "application/x-ndjson;charset=utf-8");
 		CcpDbRequester dbUtils = CcpDependencyInjection.getDependency(CcpDbRequester.class);
-		String toString = body.toString();
-		CcpJsonRepresentation executeHttpRequest = dbUtils.executeHttpRequest("elasticSearchBulk", "/_bulk", CcpHttpMethods.POST, 200, toString,  headers, CcpHttpResponseType.singleRecord);
-		List<CcpJsonRepresentation> items = executeHttpRequest.getAsJsonList(JsonFieldNames.items);
-		var stream2 = new ArrayList<>(this.bulkItems).stream();
-		var stream2Map = stream2.map(bulkItem -> new ElasticSearchBulkOperationResult(bulkItem, items));
+		String requestBody = body.toString();
+		CcpJsonRepresentation bulkResponse = dbUtils.executeHttpRequest("elasticSearchBulk", "/_bulk", CcpHttpMethods.POST, 200, requestBody,  headers, CcpHttpResponseType.singleRecord);
+		List<CcpJsonRepresentation> items = bulkResponse.getAsJsonList(JsonFieldNames.items);
+		var bulkItemsCopyStream = new ArrayList<>(this.bulkItems).stream();
+		var operationResultsStream = bulkItemsCopyStream.map(bulkItem -> new ElasticSearchBulkOperationResult(bulkItem, items));
 
-		List<CcpBulkOperationResult> collect = stream2Map.collect(Collectors.toList());
+		List<CcpBulkOperationResult> operationResults = operationResultsStream.collect(Collectors.toList());
 		synchronized (String.class) {
 			this.bulkItems.clear();
 		}
-		return collect;
+		return operationResults;
 	}
 
 	public CcpBulkExecutor clearRecords() {

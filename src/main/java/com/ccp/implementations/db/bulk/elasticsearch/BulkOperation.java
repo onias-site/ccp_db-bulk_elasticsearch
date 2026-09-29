@@ -11,9 +11,9 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaDa
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
- * Enum que representa as operações bulk do Elasticsearch ({@code delete}, {@code update},
- * {@code create}). Cada constante gera a segunda linha do par NDJSON correspondente à
- * operação via {@code getContent(CcpBulkItem)}.
+ * Enum representing the Elasticsearch bulk operations ({@code delete}, {@code update},
+ * {@code create}). Each constant produces the second line of the NDJSON pair for its
+ * operation via {@code getContent(CcpBulkItem)}.
  */
 enum BulkOperation implements CcpJsonFieldName{
 	delete {
@@ -24,15 +24,15 @@ enum BulkOperation implements CcpJsonFieldName{
 	}, update {
 		
 		String getSecondLine(CcpJsonRepresentation json) {
-			CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.doc, json);
-			String asUgglyJson = put.asUgglyJson();
+			CcpJsonRepresentation jsonWithDoc = CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.doc, json);
+			String asUgglyJson = jsonWithDoc.asUgglyJson();
 			return asUgglyJson;
 		}
 	}, create {
-		
+
 		String getSecondLine(CcpJsonRepresentation json) {
-			String asUgglyJson2 = json.asUgglyJson();
-			return asUgglyJson2;
+			String asUgglyJson = json.asUgglyJson();
+			return asUgglyJson;
 		}
 	}
 	;
@@ -43,22 +43,22 @@ enum BulkOperation implements CcpJsonFieldName{
 		String firstLine = this.getFirstLine(item);
 		
 		String secondLine = this.getSecondLine(item.json);
-		String firstLineMais = firstLine + NEW_LINE;
-		String firstLineMaisMais = firstLineMais + secondLine;
+		String firstLineWithNewLine = firstLine + NEW_LINE;
+		String bothLines = firstLineWithNewLine + secondLine;
 
-		String content = firstLineMaisMais + NEW_LINE;
-	
+		String content = bothLines + NEW_LINE;
+
 		return content;
 	}
 
 	private String getFirstLine(CcpBulkItem item) {
 		CcpEntityMetaData entityDetails = item.entity.getEntityMetaData();
 		String entityName = entityDetails.entityName;
-		CcpJsonRepresentation addToItem = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation actionWithIndex = CcpOtherConstants.EMPTY_JSON
 				.addToItem(this, CcpJsonCommonsFields._index, entityName);
-				CcpJsonRepresentation addToItem2 = addToItem
+				CcpJsonRepresentation actionWithIndexAndId = actionWithIndex
 				.addToItem(this, CcpJsonCommonsFields._id, item.id);
-				String firstLine = addToItem2
+				String firstLine = actionWithIndexAndId
 				.asUgglyJson();
 		return firstLine;
 	}

@@ -7,8 +7,8 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkExecutor;
 
 /**
- * Provedor de DI que cria e expõe uma instância de {@code ElasticSerchDbBulkExecutor}
- * como implementação de {@code CcpBulkExecutor}.
+ * DI provider that creates and exposes an {@code ElasticSerchDbBulkExecutor} instance
+ * as the {@code CcpBulkExecutor} implementation.
  */
 public class CcpElasticSerchDbBulk implements CcpInstanceProvider<CcpBulkExecutor> {
 
