@@ -25,12 +25,22 @@ import java.util.stream.Stream;
  */
 class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 	
+	/** The accumulated items. */
 	private final List<CcpBulkItem> bulkItems;
 	
+	/**
+	 * Builds an executor holding the items.
+	 * @param bulkItems the items
+	 */
 	public ElasticSerchDbBulkExecutor(List<CcpBulkItem> bulkItems) {
 		this.bulkItems = bulkItems;
 	}
 
+	/**
+	 * Returns a new executor with the item appended (this executor is not changed).
+	 * @param bulkItem the item
+	 * @return the new executor
+	 */
 	public CcpBulkExecutor addRecord(CcpBulkItem bulkItem) {
 		ArrayList<CcpBulkItem> bulkItems = new ArrayList<>(this.bulkItems);
 		bulkItems.add(bulkItem);
@@ -38,6 +48,11 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 		return response;
 	}
 
+	/**
+	 * Sends every item in one {@code POST /_bulk} (NDJSON) request and returns the result of each item, in order; then
+	 * clears the items of this executor. No request is made when there is no item.
+	 * @return the result of each item
+	 */
 	public List<CcpBulkOperationResult> getBulkOperationResult() {
 		boolean bulkItemsEmpty = this.bulkItems.isEmpty();
 		if(bulkItemsEmpty) { 
@@ -66,6 +81,10 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 		return operationResults;
 	}
 
+	/**
+	 * Returns a new empty executor.
+	 * @return the empty executor
+	 */
 	public CcpBulkExecutor clearRecords() {
 		ElasticSerchDbBulkExecutor response = new ElasticSerchDbBulkExecutor(new ArrayList<>());
 		return response;

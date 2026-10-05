@@ -9,10 +9,17 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaDa
  * Elasticsearch _bulk API.
  */
 class BulkItem {
+	/** The document id. */
 	final String id;
+	/** The index name. */
 	final String entity;
+	/** The NDJSON lines of the item (action line and, except for delete, document line), each ended by the line separator. */
 	final String content;
 
+	/**
+	 * Builds the NDJSON content of the item from its operation.
+	 * @param item the abstract bulk item
+	 */
 	public BulkItem(CcpBulkItem item) {
 
 		String name = item.operation.name();
@@ -26,6 +33,10 @@ class BulkItem {
 	
 	
 	
+	/**
+	 * Describes id, index and content.
+	 * @return the description
+	 */
 	public String toString() {
 		String textWithId = "BulkItem [id=" + id;
 		String textWithEntityLabel = textWithId + ", entity=";
@@ -37,6 +48,10 @@ class BulkItem {
 	}
 
 
+	/**
+	 * Consistent with {@link #equals(Object)}: hash of index name plus id.
+	 * @return the hash code
+	 */
 	public int hashCode() {
 		String entityAndId = this.entity + this.id;
 		int hashCode = (entityAndId).hashCode();
@@ -44,6 +59,11 @@ class BulkItem {
 	}
 	
 	
+	/**
+	 * Two items are equal when they have the same index and id.
+	 * @param obj the other object
+	 * @return {@code true} for the same index and id
+	 */
 	public boolean equals(Object obj) {
 		try {
 			BulkItem other = (BulkItem)obj;
