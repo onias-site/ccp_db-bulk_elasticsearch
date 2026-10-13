@@ -62,7 +62,11 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 		String fieldNameToEntity = dbRequester.getFieldNameToEntity();
 		String fieldNameToId = dbRequester.getFieldNameToId();
 		Stream<CcpJsonRepresentation> resultStream = result.stream();
-		var operationResultsStream = resultStream.map(x -> x.getInnerJson(bulkItem.operation));
+		// the result comes under the Elasticsearch action, which is not always the name of the operation (scriptedUpdate is an update)
+		String operationName = bulkItem.operation.name();
+		BulkOperation bulkOperation = BulkOperation.valueOf(operationName);
+		CcpJsonFieldName action = bulkOperation.getAction();
+		var operationResultsStream = resultStream.map(x -> x.getInnerJson(action));
 		List<CcpJsonRepresentation> operationResults = operationResultsStream.collect(Collectors.toList());
 		Stream<CcpJsonRepresentation> operationResultsToFilter = operationResults.stream();
 		var resultsWithSameId = operationResultsToFilter.filter(x -> x.getAsString(new CcpFieldName(fieldNameToId)).equals(bulkItem.id));
