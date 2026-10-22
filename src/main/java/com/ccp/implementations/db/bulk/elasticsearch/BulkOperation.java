@@ -29,7 +29,13 @@ enum BulkOperation implements CcpJsonFieldName{
 			return "";
 		}
 	},
-	/** {@code update} action: the document line is {@code {"doc": record}} (partial update). */
+	/**
+	 * {@code update} action: the document line is {@code {"doc": record}} (partial update). Elasticsearch reads the
+	 * document and writes it back with the version it read, so two updates of the same document at the same moment made
+	 * the second fail with a version conflict (the copies of the disposable records, saved by concurrent writes of the
+	 * same record, until 2026-10-21); the conflict is now retried by Elasticsearch itself ({@code retry_on_conflict}),
+	 * which only applies the same partial document again.
+	 */
 	update {
 
 		/**
@@ -41,6 +47,16 @@ enum BulkOperation implements CcpJsonFieldName{
 			CcpJsonRepresentation jsonWithDoc = CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.doc, json);
 			String asUgglyJson = jsonWithDoc.asUgglyJson();
 			return asUgglyJson;
+		}
+
+		/**
+		 * Asks Elasticsearch to retry the update when another update of the same document got there first.
+		 * @param actionLine the action line
+		 * @return the action line with {@code retry_on_conflict}
+		 */
+		CcpJsonRepresentation addActionOptions(CcpJsonRepresentation actionLine) {
+			CcpJsonRepresentation actionLineWithRetries = actionLine.addToItem(this, JsonFieldNames.retry_on_conflict, RETRIES_ON_CONFLICT);
+			return actionLineWithRetries;
 		}
 	},
 	/** {@code create} action: the document line is the record itself. */
@@ -108,7 +124,7 @@ enum BulkOperation implements CcpJsonFieldName{
 	/** The platform line separator, used to end the NDJSON lines. */
 	static final String NEW_LINE = System.getProperty(BulkOperationSpecialWords.line_separator.getValue());
 
-	/** How many times Elasticsearch retries a scripted update that lost a version conflict. */
+	/** How many times Elasticsearch retries an update (scripted or partial) that lost a version conflict. */
 	static final int RETRIES_ON_CONFLICT = 10;
 
 	/**
