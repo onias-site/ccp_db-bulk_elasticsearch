@@ -11,7 +11,10 @@ import com.ccp.especifications.db.bulk.CcpBulkExecutor;
  * as the {@code CcpBulkExecutor} implementation.
  */
 public class CcpElasticSerchDbBulk implements CcpInstanceProvider<CcpBulkExecutor> {
+	/** The single instance: the class keeps no state. */
+	public final static CcpElasticSerchDbBulk INSTANCE = new CcpElasticSerchDbBulk();
 
+	private CcpElasticSerchDbBulk() {}
 
 	/**
 	 * Builds an empty Elasticsearch bulk executor.
