@@ -1,8 +1,6 @@
 package com.ccp.implementations.db.bulk.elasticsearch;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpFieldName;
@@ -15,7 +13,6 @@ import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
-import java.util.stream.Stream;
 
 /**
  * Represents the result of a single operation inside an Elasticsearch bulk response.
@@ -49,51 +46,43 @@ class ElasticSearchBulkOperationResult implements CcpBulkOperationResult{
 	private final Integer status;
 	
 	/**
-	 * Finds, among the items of the {@code _bulk} response, the one of the same operation, id and index as the bulk item.
+	 * Takes, among the items of the {@code _bulk} response, the one at the same position as the bulk item in the request
+	 * (Elasticsearch answers the actions in the order they were sent) and checks that it has the same id and index.
+	 * Until 2026-11-03 every bulk item scanned the whole response, which made a bulk of n items cost n² and kept the
+	 * recreation of the vis entities (more than 250 thousand seeds) running for hours after the records were written.
 	 * @param bulkItem the original bulk item
 	 * @param result the items of the bulk response
-	 * @throws CcpErrorBulkItemNotFound when the response has no item for it
+	 * @param position the position of the bulk item in the request
+	 * @throws CcpErrorBulkItemNotFound when the response has no item at that position or it belongs to another record
 	 */
-	public ElasticSearchBulkOperationResult(CcpBulkItem bulkItem, List<CcpJsonRepresentation> result) {
+	public ElasticSearchBulkOperationResult(CcpBulkItem bulkItem, List<CcpJsonRepresentation> result, int position) {
 
 		CcpEntityMetaData entityDetails = bulkItem.entity.getEntityMetaData();
 		String entityName = entityDetails.entityName;
 		CcpDbRequester dbRequester = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dbRequester.getFieldNameToEntity();
 		String fieldNameToId = dbRequester.getFieldNameToId();
-		Stream<CcpJsonRepresentation> resultStream = result.stream();
+		int resultSize = result.size();
+		boolean noItemAtThePosition = position >= resultSize;
+
+		if(noItemAtThePosition) {
+			throw new CcpErrorBulkItemNotFound(bulkItem, result);
+		}
 		// the result comes under the Elasticsearch action, which is not always the name of the operation (scriptedUpdate is an update)
 		String operationName = bulkItem.operation.name();
 		BulkOperation bulkOperation = BulkOperation.valueOf(operationName);
 		CcpJsonFieldName action = bulkOperation.getAction();
-		var operationResultsStream = resultStream.map(x -> x.getInnerJson(action));
-		List<CcpJsonRepresentation> operationResults = operationResultsStream.collect(Collectors.toList());
-		Stream<CcpJsonRepresentation> operationResultsToFilter = operationResults.stream();
-		var resultsWithSameId = operationResultsToFilter.filter(x -> x.getAsString(new CcpFieldName(fieldNameToId)).equals(bulkItem.id));
+		CcpJsonRepresentation responseItem = result.get(position);
+		CcpJsonRepresentation details = responseItem.getInnerJson(action);
+		CcpFieldName idField = new CcpFieldName(fieldNameToId);
+		String responseId = details.getAsString(idField);
+		CcpFieldName entityField = new CcpFieldName(fieldNameToEntity);
+		String responseEntity = details.getAsString(entityField);
+		boolean anotherRecord = false == responseId.equals(bulkItem.id) || false == responseEntity.equals(entityName);
 
-		List<CcpJsonRepresentation> filteredById = resultsWithSameId.collect(Collectors.toList());
-		boolean filteredByIdEmpty = filteredById.isEmpty();
-
-		if(filteredByIdEmpty) {
-			CcpErrorBulkItemNotFound ccpErrorBulkItemNotFound = new CcpErrorBulkItemNotFound(bulkItem, result);
-
-			throw ccpErrorBulkItemNotFound;
+		if(anotherRecord) {
+			throw new CcpErrorBulkItemNotFound(bulkItem, result);
 		}
-		Stream<CcpJsonRepresentation> filteredByIdStream = filteredById.stream();
-		var resultsWithSameEntity = filteredByIdStream
-		.filter(x -> x.getAsString(new CcpFieldName(fieldNameToEntity)).equals(entityName));
-		Optional<CcpJsonRepresentation> matchingResult = resultsWithSameEntity
-		.findFirst();
-		boolean matchingResultPresent = matchingResult.isPresent();
-
-		boolean idNotFoundInTheEntity = false == matchingResultPresent;
-
-		if(idNotFoundInTheEntity) {
-			CcpErrorBulkItemNotFound idNotFoundInEntityError = new CcpErrorBulkItemNotFound(bulkItem, result);
-			throw idNotFoundInEntityError;
-		}
-
-		CcpJsonRepresentation details = matchingResult.get();
 
 		this.status = details.getAsIntegerNumber(JsonFieldNames.status); 
 		this.errorDetails = details.getInnerJson(CcpJsonCommonsFields.error);

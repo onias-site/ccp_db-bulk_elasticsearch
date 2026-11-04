@@ -71,10 +71,14 @@ class ElasticSerchDbBulkExecutor implements CcpBulkExecutor{
 		String requestBody = body.toString();
 		CcpJsonRepresentation bulkResponse = dbUtils.executeHttpRequest("elasticSearchBulk", "/_bulk", CcpHttpMethods.POST, 200, requestBody,  headers, CcpHttpResponseType.singleRecord);
 		List<CcpJsonRepresentation> items = bulkResponse.getAsJsonList(JsonFieldNames.items);
-		var bulkItemsCopyStream = new ArrayList<>(this.bulkItems).stream();
-		var operationResultsStream = bulkItemsCopyStream.map(bulkItem -> new ElasticSearchBulkOperationResult(bulkItem, items));
-
-		List<CcpBulkOperationResult> operationResults = operationResultsStream.collect(Collectors.toList());
+		List<CcpBulkItem> bulkItemsCopy = new ArrayList<>(this.bulkItems);
+		List<CcpBulkOperationResult> operationResults = new ArrayList<>();
+		int position = 0;
+		for (CcpBulkItem bulkItem : bulkItemsCopy) {
+			ElasticSearchBulkOperationResult operationResult = new ElasticSearchBulkOperationResult(bulkItem, items, position);
+			operationResults.add(operationResult);
+			position++;
+		}
 		synchronized (String.class) {
 			this.bulkItems.clear();
 		}
